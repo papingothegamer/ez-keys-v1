@@ -53,7 +53,7 @@ export interface ParsedRoot {
 
 // Parse a root token like "Eb", "F#", "C", "G##".
 export function parseRoot(token: string): ParsedRoot | null {
-  const match = token.match(/^([A-Ga-g])(#{0,2}|b{0,2}|x?)/)
+  const match = token.match(/^([A-Ga-g])([#bx]*)/)
   if (!match) return null
   const letter = match[1].toUpperCase() as Letter
   const accidental = match[2]

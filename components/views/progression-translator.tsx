@@ -67,7 +67,7 @@ export function ProgressionTranslator() {
         />
         <div className="flex items-center gap-2">
           <span className="whitespace-nowrap text-xs uppercase tracking-wide text-muted-foreground">Key</span>
-          <Select value={keyRoot} onValueChange={setKeyRoot}>
+          <Select value={keyRoot} onValueChange={(v) => v && setKeyRoot(v)}>
             <SelectTrigger className="w-24">
               <SelectValue />
             </SelectTrigger>

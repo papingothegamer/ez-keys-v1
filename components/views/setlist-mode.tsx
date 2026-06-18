@@ -63,7 +63,7 @@ export function SetlistMode() {
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Key</span>
-            <Select value={key} onValueChange={setKey}>
+            <Select value={key} onValueChange={(v) => v && setKey(v)}>
               <SelectTrigger className="w-28">
                 <SelectValue />
               </SelectTrigger>

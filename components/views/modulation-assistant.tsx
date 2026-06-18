@@ -94,7 +94,7 @@ function KeyPicker({ label, value, onChange }: { label: string; value: string; o
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={(v) => v && onChange(v)}>
         <SelectTrigger className="w-28">
           <SelectValue />
         </SelectTrigger>
