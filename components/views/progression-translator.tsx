@@ -1,129 +1,113 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { Card } from "@/components/ui/card"
+import { useState, useMemo, useEffect } from "react"
+import { Play } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card } from "@/components/ui/card"
 import { useAppStore } from "@/lib/store"
-import { parseChord, type GeneratedChord } from "@/lib/theory/chords"
+import { type GeneratedChord } from "@/lib/theory/chords"
 import { parseRoot } from "@/lib/theory/notes"
-import { convertToShape, generateVoicings } from "@/lib/theory/voicings"
+import { parseNns, formatRelativeChord } from "@/lib/theory/nns"
+import { convertToShape, generateVoicings, shiftPlacedNotes } from "@/lib/theory/voicings"
 import { WorkspaceHeader } from "@/components/workspace-header"
-
-const ROMAN = ["I", "bII", "II", "bIII", "III", "IV", "#IV", "V", "bVI", "VI", "bVII", "VII"]
-const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
-
-function isMinorish(chord: GeneratedChord) {
-  return chord.intervals.includes(3)
-}
-
-function romanFor(chord: GeneratedChord, keyPc: number) {
-  const interval = ((chord.rootPc - keyPc) % 12 + 12) % 12
-  let r = ROMAN[interval]
-  if (isMinorish(chord)) r = r.toLowerCase()
-  if (chord.type.symbol.includes("dim") || chord.type.symbol === "m7b5") r += "\u00B0"
-  return r
-}
+import { Keyboard } from "@/components/keyboard"
 
 export function ProgressionTranslator() {
-  const [input, setInput] = useState("Eb | Cm | Ab | Bb")
+  const [input, setInput] = useState("1 5 6m 4")
   const accidental = useAppStore((s) => s.accidental)
   const referenceKey = useAppStore((s) => s.referenceKey)
-  const setKeyboard = useAppStore((s) => s.setKeyboard)
+  const notationSystem = useAppStore((s) => s.notationSystem)
+  const { activeKey } = useAppStore()
 
-  const chords = useMemo(() => {
-    return input
-      .split(/[|,]/)
-      .map((c) => c.trim())
-      .filter(Boolean)
-      .map((c) => ({ raw: c, chord: parseChord(c) }))
+  const tokens = useMemo(() => {
+    return input.split(/\s+/).filter(Boolean)
   }, [input])
 
-  const [keyRoot, setKeyRoot] = useState("Eb")
-  const keyPc = useMemo(() => parseRoot(keyRoot)?.pc ?? 0, [keyRoot])
-  const refPc = useMemo(() => parseRoot(referenceKey)?.pc ?? 0, [referenceKey])
+  const chords = useMemo(() => {
+    return tokens.map(token => ({
+      raw: token,
+      chord: parseNns(token, activeKey)
+    }))
+  }, [tokens, activeKey])
 
-  const firstValid = chords.find((c) => c.chord)?.chord
-  useEffect(() => {
-    if (firstValid) {
-      const v = generateVoicings(firstValid)[0]
-      setKeyboard({ notes: v.placed, label: firstValid.symbol })
-    }
-  }, [firstValid, setKeyboard])
+  const refPc = useMemo(() => parseRoot(referenceKey)?.pc ?? 0, [referenceKey])
+  const actPc = useMemo(() => parseRoot(activeKey)?.pc ?? 0, [activeKey])
+  const transpose = useMemo(() => ((actPc - refPc) % 12 + 12) % 12, [refPc, actPc])
+  const [activeIndex, setActiveIndex] = useState<number>(0)
+
+  const activeObj = chords[activeIndex]
+  const activeChordObj = activeObj?.chord
+
+  const { shape, placed } = useMemo(() => {
+    if (!activeChordObj) return { shape: null, placed: [] }
+    const conversion = convertToShape(activeChordObj, transpose, accidental)
+    const voicings = generateVoicings(activeChordObj)
+    const physicalNotes = shiftPlacedNotes(voicings[0]?.placed ?? [], -transpose)
+    return { shape: conversion.shape, placed: physicalNotes }
+  }, [activeChordObj, transpose, accidental])
 
   return (
-    <div>
+    <div className="flex flex-col h-full min-h-0">
       <WorkspaceHeader
-        title="Progression Translator"
-        description="Enter a chord progression and instantly see the shapes to play in your reference key, with Roman numerals."
+        title="Progression Sandbox"
+        description="Type a chord progression using NNS (e.g. 1 5 6m 4) and click any chord to see how to play it."
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Eb | Cm | Ab | Bb"
-          className="h-11 font-mono text-base"
-        />
-        <div className="flex items-center gap-2">
-          <span className="whitespace-nowrap text-xs uppercase tracking-wide text-muted-foreground">Key</span>
-          <Select value={keyRoot} onValueChange={(v) => v && setKeyRoot(v)}>
-            <SelectTrigger className="w-24">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ROOTS.map((r) => (
-                <SelectItem key={r} value={r}>
-                  {r}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex-1 overflow-y-auto min-h-0 pb-6 flex flex-col gap-6">
+        <Card className="p-5 bg-card/60 backdrop-blur-md">
+          <div className="mb-4 flex flex-col gap-1.5">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Progression (NNS or Chords)</span>
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="1 5 6m 4"
+              className="h-12 font-mono text-lg"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {chords.map((c, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`px-4 py-3 rounded-md border font-mono text-lg font-semibold transition-all ${
+                  i === activeIndex 
+                    ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" 
+                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80 hover:text-foreground"
+                }`}
+              >
+                {c.raw}
+                <div className={`text-[10px] mt-1 font-sans tracking-widest uppercase ${i === activeIndex ? "text-primary-foreground/70" : "text-muted-foreground/50"}`}>
+                  {c.chord ? c.chord.symbol : "—"}
+                </div>
+              </button>
+            ))}
+          </div>
+        </Card>
+
+        {activeChordObj ? (
+          <div className="flex-1 min-h-0 flex flex-col gap-5">
+            <div className="flex items-center gap-8 justify-center">
+              <div className="text-center">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Sounding</p>
+                <p className="font-heading text-3xl font-bold">{activeChordObj.symbol}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs uppercase tracking-wider text-primary mb-1">Play Shape</p>
+                <p className="font-heading text-3xl font-bold text-primary">{shape?.symbol ?? "—"}</p>
+              </div>
+            </div>
+
+            <div className="flex-1 min-h-[200px] bg-background rounded-lg border border-border shadow-sm overflow-hidden flex flex-col justify-end">
+              <Keyboard notes={placed} startMidi={48} endMidi={71} className="border-0 rounded-none bg-transparent" />
+            </div>
+          </div>
+        ) : (
+          <Card className="flex-1 flex items-center justify-center p-6 text-sm text-muted-foreground">
+            {tokens.length === 0 ? "Type a progression to begin." : "Invalid chord selected."}
+          </Card>
+        )}
       </div>
-
-      <Card className="mt-6 overflow-x-auto p-0">
-        <div className="grid" style={{ gridTemplateColumns: `120px repeat(${Math.max(chords.length, 1)}, minmax(80px, 1fr))` }}>
-          <RowHeader label="Sounding" />
-          {chords.map((c, i) => (
-            <Cell key={`s-${i}`} className="font-heading text-lg font-semibold text-foreground">
-              {c.chord ? c.chord.symbol : <span className="text-destructive">{c.raw}?</span>}
-            </Cell>
-          ))}
-
-          <RowHeader label="Roman" muted />
-          {chords.map((c, i) => (
-            <Cell key={`r-${i}`} className="font-mono text-sm text-muted-foreground">
-              {c.chord ? romanFor(c.chord, keyPc) : "—"}
-            </Cell>
-          ))}
-
-          <RowHeader label="Transpose" muted />
-          {chords.map((c, i) => {
-            const conv = c.chord ? convertToShape(c.chord, refPc, accidental) : null
-            return (
-              <Cell key={`t-${i}`} className="font-mono text-sm text-muted-foreground">
-                {conv ? `+${conv.semitones}` : "—"}
-              </Cell>
-            )
-          })}
-
-          <RowHeader label="Play Shape" highlight />
-          {chords.map((c, i) => {
-            const conv = c.chord ? convertToShape(c.chord, refPc, accidental) : null
-            return (
-              <Cell key={`p-${i}`} className="bg-primary/5 font-heading text-lg font-semibold text-primary">
-                {conv ? conv.shape.symbol : "—"}
-              </Cell>
-            )
-          })}
-        </div>
-      </Card>
-
-      <p className="mt-3 text-xs text-muted-foreground">
-        Play shapes assume your reference key is{" "}
-        <span className="font-mono font-medium text-foreground">{referenceKey}</span>. Change it in Settings.
-      </p>
     </div>
   )
 }

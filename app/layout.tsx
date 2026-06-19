@@ -30,9 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`dark ${outfit.variable} ${inter.variable} ${jetbrainsMono.variable} bg-background`}
     >
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>

@@ -19,6 +19,8 @@ export function SettingsView() {
     setAccidental,
     referenceKey,
     setReferenceKey,
+    notationSystem,
+    setNotationSystem,
     setKeyboard,
   } = useAppStore()
 
@@ -68,6 +70,19 @@ export function SettingsView() {
             ]}
             value={accidental}
             onChange={(v) => setAccidental(v as "flat" | "sharp")}
+          />
+        </Card>
+
+        <Card className="p-5">
+          <Label className="text-sm font-semibold">Notation System</Label>
+          <p className="mb-3 text-xs text-muted-foreground">Prefer letters (C, E, G) or numbers (1, 3, 5).</p>
+          <SegmentGroup
+            options={[
+              { value: "letters", label: "Letters" },
+              { value: "numbers", label: "Numbers" },
+            ]}
+            value={notationSystem}
+            onChange={(v) => setNotationSystem(v as "letters" | "numbers")}
           />
         </Card>
 

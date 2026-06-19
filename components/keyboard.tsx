@@ -27,6 +27,8 @@ interface KeyboardProps {
   // Pitch classes to highlight across every octave (used for scales).
   highlightPcs?: { pc: number; hand: Hand }[]
   className?: string
+  startMidi?: number
+  endMidi?: number
 }
 
 const handBg: Record<Hand, string> = {
@@ -40,12 +42,16 @@ const handText: Record<Hand, string> = {
   shared: "text-hand-shared-foreground",
 }
 
-export function Keyboard({ notes = [], highlightPcs = [], className }: KeyboardProps) {
+export function Keyboard({ notes = [], highlightPcs = [], className, startMidi, endMidi }: KeyboardProps) {
   const keyboardSize = useAppStore((s) => s.keyboardSize)
   const accidental = useAppStore((s) => s.accidental)
+  const notationSystem = useAppStore((s) => s.notationSystem)
+  const kbRootPc = useAppStore((s) => s.kbRootPc)
   const [hovered, setHovered] = useState<number | null>(null)
 
-  const { start, end } = RANGES[keyboardSize]
+  const defaultRange = RANGES[keyboardSize]
+  const start = startMidi ?? defaultRange.start
+  const end = endMidi ?? defaultRange.end
 
   const midiToHand = useMemo(() => {
     const map = new Map<number, Hand>()
@@ -74,6 +80,16 @@ export function Keyboard({ notes = [], highlightPcs = [], className }: KeyboardP
     return null
   }
 
+  // NNS relative names for pitch classes relative to a root (1, b2, 2, b3, 3, 4, #4, 5, b6, 6, b7, 7)
+  const NNS_NAMES = ["1", "b2", "2", "b3", "3", "4", "#4", "5", "b6", "6", "b7", "7"]
+  function getLabel(pc: number) {
+    if (notationSystem === "numbers" && kbRootPc !== null) {
+      const interval = ((pc - kbRootPc) % 12 + 12) % 12
+      return NNS_NAMES[interval]
+    }
+    return pcName(pc, accidental)
+  }
+
   return (
     <div className={cn("w-full overflow-x-auto rounded-lg border border-border bg-card/60 p-3", className)}>
       <div className="relative flex h-44 min-w-full select-none sm:h-52">
@@ -98,9 +114,9 @@ export function Keyboard({ notes = [], highlightPcs = [], className }: KeyboardP
               >
                 <span className="pointer-events-none flex h-full flex-col items-center justify-end pb-2 text-[10px] font-medium">
                   {hand ? (
-                    <span className="font-mono">{pcName(pc, accidental)}</span>
+                    <span className="font-mono">{getLabel(pc)}</span>
                   ) : hovered === midi ? (
-                    <span className="font-mono text-background/70">{pcName(pc, accidental)}</span>
+                    <span className="font-mono text-background/70">{getLabel(pc)}</span>
                   ) : isC ? (
                     <span className="font-mono text-background/40">{`C${Math.floor(midi / 12) - 1}`}</span>
                   ) : null}
@@ -123,9 +139,9 @@ export function Keyboard({ notes = [], highlightPcs = [], className }: KeyboardP
                 >
                   <span className="pointer-events-none flex h-full flex-col items-center justify-end pb-1 text-[9px] font-medium">
                     {blackHand ? (
-                      <span className="font-mono">{pcName(((blackMidi % 12) + 12) % 12, accidental)}</span>
+                      <span className="font-mono">{getLabel(((blackMidi % 12) + 12) % 12)}</span>
                     ) : hovered === blackMidi ? (
-                      <span className="font-mono">{pcName(((blackMidi % 12) + 12) % 12, accidental)}</span>
+                      <span className="font-mono">{getLabel(((blackMidi % 12) + 12) % 12)}</span>
                     ) : null}
                   </span>
                 </button>

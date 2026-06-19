@@ -15,14 +15,23 @@ export function ScaleExplorer() {
   const [root, setRoot] = useState("C")
   const [typeIdx, setTypeIdx] = useState(0)
   const setKeyboard = useAppStore((s) => s.setKeyboard)
+  const notationSystem = useAppStore((s) => s.notationSystem)
 
   const scale = useMemo(() => parseScale(root, SCALE_TYPES[typeIdx]), [root, typeIdx])
 
   useEffect(() => {
     if (scale) {
+      const baseMidi = 60 + scale.rootPc
+      const notes = scale.pcs.map((pc) => {
+        const octaveShift = pc < scale.rootPc ? 12 : 0
+        return { midi: 60 + pc + octaveShift, hand: "right" as const }
+      })
+      notes.push({ midi: baseMidi + 12, hand: "right" as const })
+
       setKeyboard({
-        pcs: scale.pcs.map((pc) => ({ pc, hand: "right" as const })),
+        notes,
         label: `${scale.rootName} ${scale.type.name}`,
+        rootPc: scale.rootPc,
       })
     } else {
       setKeyboard({})
@@ -76,10 +85,10 @@ export function ScaleExplorer() {
               <span className="text-muted-foreground">{scale.type.name}</span>
             </div>
             <div className="grid gap-4">
-              <LabeledRow label="Notes">
-                <NoteChips notes={scale.notes} tone="primary" />
+              <LabeledRow label="Scale Notes">
+                <NoteChips notes={notationSystem === "numbers" ? scale.degreeLabels : scale.notes} tone="primary" />
               </LabeledRow>
-              <LabeledRow label="Degrees">
+              <LabeledRow label="Intervals">
                 <NoteChips notes={scale.degreeLabels} />
               </LabeledRow>
             </div>

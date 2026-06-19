@@ -6,7 +6,10 @@ import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAppStore } from "@/lib/store"
 import { parseRoot, pcName } from "@/lib/theory/notes"
+import { parseChord } from "@/lib/theory/chords"
+import { convertToShape } from "@/lib/theory/voicings"
 import { WorkspaceHeader } from "@/components/workspace-header"
+import { Badge } from "@/components/ui/badge"
 
 const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 
@@ -28,11 +31,26 @@ export function ModulationAssistant() {
     const currentTranspose = ((curPc - refPc) % 12 + 12) % 12
     const newTranspose = ((tgtPc - refPc) % 12 + 12) % 12
     const adjustment = newTranspose - currentTranspose
-    // Alternative: keep transpose fixed, change the physical shape instead.
-    const currentShape = pcName(refPc, accidental)
-    const newShapePc = ((refPc + (tgtPc - curPc)) % 12 + 12) % 12
-    const newShape = pcName(newShapePc, accidental)
-    return { currentTranspose, newTranspose, adjustment, currentShape, newShape }
+    
+    // Use the chord engine to get example chords (the I chord)
+    const currentIChord = parseChord(`${current}maj7`)
+    const targetIChord = parseChord(`${target}maj7`)
+    const currentShape = currentIChord ? convertToShape(currentIChord, refPc, accidental)?.shape.symbol : "—"
+    
+    // If transpose is fixed, they play a new shape to sound like the target chord
+    // To find the new shape, we convert the target chord using the OLD transpose setting.
+    // wait, transpose setting maps physical C to sounding Eb. So sounding = physical + transpose.
+    // physical = sounding - transpose.
+    // So new physical shape root = target root - currentTranspose
+    const newShapePc = ((tgtPc - currentTranspose) % 12 + 12) % 12
+    const newShapeRootName = pcName(newShapePc, accidental)
+    const newShape = `${newShapeRootName}maj7`
+
+    return { 
+      currentTranspose, newTranspose, adjustment, 
+      currentShape, newShape,
+      currentIChord: currentIChord?.symbol, targetIChord: targetIChord?.symbol
+    }
   }, [current, target, referenceKey, accidental])
 
   return (
@@ -49,8 +67,11 @@ export function ModulationAssistant() {
       </div>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2">
-        <Card className="p-5">
-          <h3 className="mb-4 font-heading text-base font-semibold">Adjust the Transpose</h3>
+        <Card className="flex flex-col p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-heading text-base font-semibold">Adjust the Transpose</h3>
+            <Badge variant="secondary">Same Shapes</Badge>
+          </div>
           <div className="space-y-3">
             <StatRow label="Current Transpose" value={`+${data.currentTranspose}`} />
             <StatRow label="New Transpose" value={`+${data.newTranspose}`} highlight />
@@ -60,15 +81,32 @@ export function ModulationAssistant() {
               value={`${data.adjustment >= 0 ? "+" : ""}${data.adjustment}`}
             />
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Keep playing the same shapes — just change your keyboard&apos;s transpose setting from{" "}
-            <span className="font-mono text-foreground">+{data.currentTranspose}</span> to{" "}
-            <span className="font-mono text-foreground">+{data.newTranspose}</span>.
-          </p>
+          <div className="mt-auto pt-5">
+            <div className="rounded-md bg-secondary/30 p-3 text-sm">
+              <p className="text-muted-foreground mb-2">Example (I chord):</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground font-semibold">{data.currentIChord}</p>
+                  <p className="text-[10px] text-muted-foreground">Sounding</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-primary font-semibold">{data.targetIChord}</p>
+                  <p className="text-[10px] text-muted-foreground">Sounding</p>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                You play <span className="font-mono text-foreground">{data.currentShape}</span> both times. Just change your transpose by <span className="font-mono text-foreground font-semibold">{data.adjustment >= 0 ? "+" : ""}{data.adjustment}</span>.
+              </p>
+            </div>
+          </div>
         </Card>
 
-        <Card className="p-5">
-          <h3 className="mb-4 font-heading text-base font-semibold">Keep Transpose Fixed</h3>
+        <Card className="flex flex-col p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-heading text-base font-semibold">Keep Transpose Fixed</h3>
+            <Badge variant="secondary">Change Shapes</Badge>
+          </div>
           <div className="flex items-center justify-around gap-3 py-2">
             <div className="text-center">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Current Shape</p>
@@ -80,10 +118,25 @@ export function ModulationAssistant() {
               <p className="mt-1 font-heading text-3xl font-semibold text-primary">{data.newShape}</p>
             </div>
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Prefer not to touch the transpose dial? Leave it where it is and shift your hands to{" "}
-            <span className="font-mono text-foreground">{data.newShape}</span> shapes instead.
-          </p>
+          <div className="mt-auto pt-5">
+            <div className="rounded-md bg-secondary/30 p-3 text-sm">
+              <p className="text-muted-foreground mb-2">Example (I chord):</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground font-semibold">{data.currentIChord}</p>
+                  <p className="text-[10px] text-muted-foreground">Sounding</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-primary font-semibold">{data.targetIChord}</p>
+                  <p className="text-[10px] text-muted-foreground">Sounding</p>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                You leave transpose at <span className="font-mono text-foreground">+{data.currentTranspose}</span> and play <span className="font-mono text-foreground font-semibold">{data.newShape}</span> instead.
+              </p>
+            </div>
+          </div>
         </Card>
       </div>
     </div>

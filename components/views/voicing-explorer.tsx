@@ -1,94 +1,124 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useAppStore } from "@/lib/store"
-import { parseChord } from "@/lib/theory/chords"
-import { generateVoicings } from "@/lib/theory/voicings"
-import { WorkspaceHeader } from "@/components/workspace-header"
+import { generateVoicings, shiftPlacedNotes, convertToShape } from "@/lib/theory/voicings"
+import { generateKeyLibrary } from "@/lib/theory/library"
+import { GlobalLibraryBrowser } from "@/components/global-library-browser"
 import { NoteChips } from "@/components/note-chips"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { parseRoot } from "@/lib/theory/notes"
 
 export function VoicingExplorer() {
-  const [input, setInput] = useState("Fmaj9")
   const [selected, setSelected] = useState(0)
-  const setKeyboard = useAppStore((s) => s.setKeyboard)
+  const { setKeyboard, notationSystem, activeKey, activeChordIndex, referenceKey, accidental } = useAppStore()
 
-  const chord = useMemo(() => parseChord(input), [input])
+  const library = useMemo(() => generateKeyLibrary(activeKey), [activeKey])
+  const chord = library[activeChordIndex] || null
+
+  const refPc = useMemo(() => parseRoot(referenceKey)?.pc ?? 0, [referenceKey])
+  const actPc = useMemo(() => parseRoot(activeKey)?.pc ?? 0, [activeKey])
+  const transpose = useMemo(() => ((actPc - refPc) % 12 + 12) % 12, [refPc, actPc])
+
+  const conversion = useMemo(
+    () => (chord ? convertToShape(chord, transpose, accidental) : null),
+    [chord, transpose, accidental]
+  )
+
   const voicings = useMemo(() => (chord ? generateVoicings(chord) : []), [chord])
   const current = voicings[selected] ?? voicings[0]
 
   useEffect(() => {
     setSelected(0)
-  }, [input])
+  }, [chord?.symbol])
 
   useEffect(() => {
-    if (chord && current) {
-      setKeyboard({ notes: current.placed, label: `${chord.symbol} — ${current.name}` })
+    if (chord && current && conversion) {
+      const physicalNotes = shiftPlacedNotes(current.placed, -transpose)
+      setKeyboard({ 
+        notes: physicalNotes, 
+        label: `${conversion.shape.symbol} — ${current.name}`, 
+        rootPc: conversion.shape.rootPc 
+      })
     } else {
       setKeyboard({})
     }
-  }, [chord, current, setKeyboard])
+  }, [chord, current, conversion, transpose, setKeyboard])
 
   return (
-    <div>
-      <WorkspaceHeader
-        title="Voicing Explorer"
-        description="Generate practical two-hand piano voicings for any chord — from shell and rootless to gospel and pop."
-      />
+    <div className="flex flex-col h-full min-h-0">
+      <GlobalLibraryBrowser />
 
-      <div className="relative max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a chord, e.g. Fmaj9"
-          className="h-11 pl-9 font-mono text-base"
-        />
-      </div>
-
-      {!chord ? (
-        <Card className="mt-6 p-6 text-sm text-muted-foreground">Enter a valid chord to explore voicings.</Card>
-      ) : (
-        <div className="mt-6 grid gap-3">
-          {voicings.map((v, i) => {
-            const active = i === selected
-            return (
-              <button key={v.id} type="button" onClick={() => setSelected(i)} className="text-left">
-                <Card
-                  className={cn(
-                    "p-4 transition-colors",
-                    active ? "border-primary/60 bg-primary/5" : "hover:border-border/80 hover:bg-secondary/30",
-                  )}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-heading text-base font-semibold">{v.name}</span>
-                      <Badge variant="outline" className="font-normal text-muted-foreground">
-                        {v.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground text-pretty">{v.description}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium uppercase tracking-wide text-hand-left">LH</span>
-                      <NoteChips notes={v.lh} tone="left" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium uppercase tracking-wide text-hand-right">RH</span>
-                      <NoteChips notes={v.rh} tone="right" />
-                    </div>
-                  </div>
-                </Card>
+      <div className="flex-1 overflow-y-auto min-h-0 pb-6">
+        {!chord ? (
+          <Card className="mt-6 p-6 text-sm text-muted-foreground">Select a chord from the library to explore voicings.</Card>
+        ) : (
+          <div className="mt-2 flex flex-col items-center justify-center max-w-lg mx-auto w-full gap-2">
+            <div className="flex items-center justify-between w-full">
+              <button 
+                onClick={() => setSelected((prev) => (prev - 1 + voicings.length) % voicings.length)}
+                className="p-3 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary/50"
+              >
+                <ChevronLeft className="w-8 h-8" />
               </button>
-            )
-          })}
-        </div>
-      )}
+
+              <div className="flex-1 px-4 w-full">
+                {current && conversion && (
+                  <Card className="p-5 flex flex-col transition-colors border-primary/60 bg-primary/5 shadow-md min-h-[200px]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-3">
+                        <span className="font-heading text-2xl font-bold">{current.name}</span>
+                        <Badge variant="outline" className="font-medium py-0.5 px-2 text-primary border-primary/40 bg-primary/10">
+                          {current.category}
+                        </Badge>
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        {selected + 1} of {voicings.length}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground text-pretty mb-4">{current.description}</p>
+                    <div className="mt-auto flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-hand-left">Left Hand</span>
+                        <NoteChips notes={notationSystem === "numbers" ? current.lhDegrees : current.lh} tone="left" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-hand-right">Right Hand</span>
+                        <NoteChips notes={notationSystem === "numbers" ? current.rhDegrees : current.rh} tone="right" />
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
+
+              <button 
+                onClick={() => setSelected((prev) => (prev + 1) % voicings.length)}
+                className="p-3 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary/50"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            </div>
+            
+            {/* Dots indicator */}
+            <div className="flex gap-2 mt-2">
+              {voicings.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelected(i)}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all",
+                    i === selected ? "bg-primary w-4" : "bg-border hover:bg-muted-foreground/50"
+                  )}
+                  aria-label={`Go to voicing ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

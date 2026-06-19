@@ -18,7 +18,9 @@ export interface Voicing {
   category: string
   description: string
   lh: string[] // left-hand note names
+  lhDegrees: string[] // left-hand scale degrees (relative to chord)
   rh: string[] // right-hand note names
+  rhDegrees: string[] // right-hand scale degrees (relative to chord)
   placed: PlacedNote[]
 }
 
@@ -60,7 +62,7 @@ export function generateVoicings(chord: GeneratedChord): Voicing[] {
   const voicings: Voicing[] = []
 
   // 1. Root position — LH root, RH the rest.
-  voicings.push(buildVoicing("root", "Root Position", "Basic", "Root in the left hand, upper structure in the right.", [pcs[0]], [notes[0]], pcs.slice(1), notes.slice(1)))
+  voicings.push(buildVoicing("root", "Root Position", "Basic", "Root in the left hand, upper structure in the right.", [pcs[0]], [notes[0]], [chord.formula[0]], pcs.slice(1), notes.slice(1), chord.formula.slice(1)))
 
   // 2. Shell voicing — LH root, RH 3rd + 7th (or available upper tones).
   if (n >= 3) {
@@ -73,8 +75,10 @@ export function generateVoicings(chord: GeneratedChord): Voicing[] {
         "Root with the guide tones (3rd & 7th). Open and uncluttered.",
         [pcs[0]],
         [notes[0]],
+        [chord.formula[0]],
         upperIdx.map((i) => pcs[i]),
         upperIdx.map((i) => notes[i]),
+        upperIdx.map((i) => chord.formula[i]),
       ),
     )
   }
@@ -89,8 +93,10 @@ export function generateVoicings(chord: GeneratedChord): Voicing[] {
         "Bassist or transpose covers the root; both hands play color tones.",
         [pcs[1]],
         [notes[1]],
+        [chord.formula[1]],
         pcs.slice(2),
         notes.slice(2),
+        chord.formula.slice(2),
       ),
     )
   }
@@ -104,8 +110,10 @@ export function generateVoicings(chord: GeneratedChord): Voicing[] {
       "Notes spread across a wide range for a fuller, resonant sound.",
       [pcs[0], pcs[Math.min(2, n - 1)]],
       [notes[0], notes[Math.min(2, n - 1)]],
+      [chord.formula[0], chord.formula[Math.min(2, n - 1)]],
       pcs.filter((_, i) => i !== 0 && i !== Math.min(2, n - 1)),
       notes.filter((_, i) => i !== 0 && i !== Math.min(2, n - 1)),
+      chord.formula.filter((_, i) => i !== 0 && i !== Math.min(2, n - 1)),
     ),
   )
 
@@ -119,8 +127,10 @@ export function generateVoicings(chord: GeneratedChord): Voicing[] {
         "Left hand grounds the root & 5th; right hand stacks the lush extensions.",
         [pcs[0], pcs[2 % n]],
         [notes[0], notes[2 % n]],
+        [chord.formula[0], chord.formula[2 % n]],
         pcs.slice(1),
         notes.slice(1),
+        chord.formula.slice(1),
       ),
     )
   }
@@ -134,8 +144,10 @@ export function generateVoicings(chord: GeneratedChord): Voicing[] {
       "Simple left-hand root with a close right-hand triad — clean and supportive.",
       [pcs[0]],
       [notes[0]],
+      [chord.formula[0]],
       pcs.slice(0, Math.min(3, n)),
       notes.slice(0, Math.min(3, n)),
+      chord.formula.slice(0, Math.min(3, n)),
     ),
   )
 
@@ -153,8 +165,10 @@ function buildVoicing(
   description: string,
   lhPcs: number[],
   lhNames: string[],
+  lhDegrees: string[],
   rhPcs: number[],
   rhNames: string[],
+  rhDegrees: string[],
 ): Voicing {
   return {
     id,
@@ -162,7 +176,9 @@ function buildVoicing(
     category,
     description,
     lh: lhNames,
+    lhDegrees,
     rh: rhNames,
+    rhDegrees,
     placed: placeHands(lhPcs, lhNames, rhPcs, rhNames),
   }
 }
@@ -188,11 +204,14 @@ export interface ShapeConversion {
   semitones: number
 }
 
-export function convertToShape(sounding: GeneratedChord, referencePc: number, accidental: Accidental): ShapeConversion {
-  const semis = ((sounding.rootPc - referencePc) % 12 + 12) % 12
-  const shapePc = ((sounding.rootPc - semis) % 12 + 12) % 12
+export function convertToShape(sounding: GeneratedChord, transpose: number, accidental: Accidental): ShapeConversion {
+  const shapePc = ((sounding.rootPc - transpose) % 12 + 12) % 12
   const shape = chordFromPc(shapePc, sounding.type, accidental)
-  return { sounding, shape, semitones: semis }
+  return { sounding, shape, semitones: transpose }
+}
+
+export function shiftPlacedNotes(placed: PlacedNote[], semitones: number): PlacedNote[] {
+  return placed.map(n => ({ ...n, midi: n.midi + semitones }))
 }
 
 export function transposeName(name: string, semitones: number, accidental: Accidental): string {

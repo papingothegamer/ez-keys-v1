@@ -14,47 +14,102 @@ import { ModulationAssistant } from "./views/modulation-assistant"
 import { SetlistMode } from "./views/setlist-mode"
 import { SettingsView } from "./views/settings-view"
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { parseRoot } from "@/lib/theory/notes"
+
 // Views that don't need the always-on keyboard panel.
 const NO_KEYBOARD = new Set(["modulation", "setlist", "settings"])
+const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 
 export function AppWorkspace() {
-  const view = useAppStore((s) => s.view)
+  const { view, referenceKey, setReferenceKey, activeKey, setActiveKey } = useAppStore()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
   const showKeyboard = !NO_KEYBOARD.has(view)
   const active = NAV_ITEMS.find((n) => n.view === view)
 
+  const refPc = parseRoot(referenceKey)?.pc ?? 0
+  const actPc = parseRoot(activeKey)?.pc ?? 0
+  const transpose = ((actPc - refPc) % 12 + 12) % 12
+
   return (
-    <div className="flex h-dvh overflow-hidden bg-background">
+    <div className="flex h-dvh overflow-hidden bg-background text-foreground">
       <ThemeSync />
       <SidebarNav />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar */}
-        <header className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
-          <div className="flex items-center gap-2">
+        {/* Top bar (Desktop & Mobile) */}
+        <header className="flex h-14 items-center justify-between border-b border-border px-4 lg:px-8">
+          <div className="flex items-center gap-2 lg:hidden">
             <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
               <span className="font-mono text-sm font-bold leading-none">EZ</span>
             </div>
             <span className="font-heading text-sm font-semibold">{active?.label ?? "EZ-Keys"}</span>
           </div>
+
+          <div className="hidden items-center gap-4 text-sm lg:flex">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-foreground">I Play In</span>
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Fingering</span>
+              </div>
+              {mounted ? (
+                <Select value={referenceKey} onValueChange={setReferenceKey}>
+                  <SelectTrigger className="h-9 w-20 font-mono font-bold bg-secondary/50 border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROOTS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="h-9 w-20 rounded border border-border bg-secondary/50" />
+              )}
+              
+              <span className="mx-3 text-muted-foreground/30">→</span>
+              
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-foreground">Audience Hears</span>
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Sounding Key</span>
+              </div>
+              {mounted ? (
+                <Select value={activeKey} onValueChange={setActiveKey}>
+                  <SelectTrigger className="h-9 w-20 font-mono font-bold bg-secondary/50 border-border text-primary">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROOTS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="h-9 w-20 rounded border border-border bg-secondary/50" />
+              )}
+            </div>
+          </div>
+
+          <div className="hidden lg:block">
+            {mounted ? (
+              <div className="flex h-8 items-center justify-center rounded border border-primary/30 bg-primary/10 px-3 font-mono text-xs font-medium text-primary shadow-sm">
+                TRANSPOSE +{transpose}
+              </div>
+            ) : (
+              <div className="h-8 w-24 rounded border border-border bg-secondary/50" />
+            )}
+          </div>
         </header>
 
-        <div className="flex min-h-0 flex-1">
-          <main className="min-w-0 flex-1 overflow-y-auto px-5 py-6 pb-24 lg:px-8 lg:pb-8">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <main className="min-h-0 flex-1 overflow-y-auto px-5 py-4 pb-20 lg:px-8 lg:py-6 lg:pb-6">
             {mounted ? <ActiveView view={view} /> : null}
-
-            {/* Mobile/tablet: keyboard moves beneath results */}
-            {mounted && showKeyboard && (
-              <div className="mt-6 xl:hidden">
-                <KeyboardPanel variant="inline" />
-              </div>
-            )}
           </main>
 
-          {/* Desktop right panel */}
-          {showKeyboard && <KeyboardPanel variant="side" />}
+          {/* Keyboard fixed at the bottom for all screens when applicable */}
+          {mounted && showKeyboard && (
+            <div className="border-t border-border bg-background">
+              <KeyboardPanel variant="inline" />
+            </div>
+          )}
         </div>
       </div>
 

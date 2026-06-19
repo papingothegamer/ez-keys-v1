@@ -103,38 +103,38 @@
 /* Dark theme (default) */
 .dark {
   color-scheme: dark;
-  --background: oklch(0.16 0.008 260);
-  --foreground: oklch(0.95 0.005 250);
-  --card: oklch(0.2 0.009 260);
-  --card-foreground: oklch(0.95 0.005 250);
-  --popover: oklch(0.21 0.009 260);
-  --popover-foreground: oklch(0.95 0.005 250);
-  --primary: oklch(0.78 0.14 65);
+  --background: oklch(0.12 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.14 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.14 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.75 0.18 65);
   --primary-foreground: oklch(0.2 0.03 65);
-  --secondary: oklch(0.26 0.01 260);
-  --secondary-foreground: oklch(0.95 0.005 250);
-  --muted: oklch(0.24 0.01 260);
-  --muted-foreground: oklch(0.68 0.01 260);
-  --accent: oklch(0.28 0.012 260);
-  --accent-foreground: oklch(0.95 0.005 250);
+  --secondary: oklch(0.18 0 0);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.18 0 0);
+  --accent-foreground: oklch(0.95 0 0);
   --destructive: oklch(0.62 0.2 25);
-  --border: oklch(0.3 0.01 260);
-  --input: oklch(0.3 0.01 260);
-  --ring: oklch(0.78 0.14 65);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.75 0.18 65);
   --chart-1: oklch(0.78 0.14 65);
   --chart-2: oklch(0.62 0.16 255);
   --chart-3: oklch(0.68 0.15 158);
   --chart-4: oklch(0.64 0.2 300);
   --chart-5: oklch(0.7 0.02 260);
   --radius: 0.5rem;
-  --sidebar: oklch(0.18 0.009 260);
-  --sidebar-foreground: oklch(0.92 0.005 250);
-  --sidebar-primary: oklch(0.78 0.14 65);
+  --sidebar: oklch(0.13 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.75 0.18 65);
   --sidebar-primary-foreground: oklch(0.2 0.03 65);
-  --sidebar-accent: oklch(0.26 0.012 260);
-  --sidebar-accent-foreground: oklch(0.95 0.005 250);
-  --sidebar-border: oklch(0.28 0.01 260);
-  --sidebar-ring: oklch(0.78 0.14 65);
+  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.20 0 0);
+  --sidebar-ring: oklch(0.75 0.18 65);
 
   --hand-left: oklch(0.62 0.17 255);
   --hand-left-foreground: oklch(0.98 0.01 255);
@@ -149,12 +149,15 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground select-none;
   }
   html {
     @apply font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+  input, textarea, select, [contenteditable] {
+    @apply select-auto;
   }
 }
