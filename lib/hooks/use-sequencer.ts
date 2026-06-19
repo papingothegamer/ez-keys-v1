@@ -6,12 +6,11 @@ export interface SequencerState {
   totalSteps: number
 }
 
-// progression string: "1 5 6m 4" (space-separated steps, 1 step = 1 bar)
-export function useSequencer(progressionStr: string, bpm: number, timeSignature: string) {
+// steps array: ["1", "5", "6m", "4"]
+export function useSequencer(steps: string[], bpm: number, timeSignature: string) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
 
-  const steps = progressionStr.trim().split(/\s+/).filter(Boolean)
   const totalSteps = steps.length
 
   // Calculate milliseconds per bar
@@ -43,7 +42,7 @@ export function useSequencer(progressionStr: string, bpm: number, timeSignature:
   useEffect(() => {
     setIsPlaying(false)
     setCurrentStep(0)
-  }, [progressionStr])
+  }, [steps.join(" ")])
 
   const togglePlayback = () => {
     if (totalSteps === 0) return

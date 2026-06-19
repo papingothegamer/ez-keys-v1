@@ -11,6 +11,7 @@ import { GlobalLibraryBrowser } from "@/components/global-library-browser"
 import { NoteChips } from "@/components/note-chips"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { parseRoot } from "@/lib/theory/notes"
+import { KeyboardPanel } from "@/components/keyboard-panel"
 
 export function VoicingExplorer() {
   const [selected, setSelected] = useState(0)
@@ -28,7 +29,7 @@ export function VoicingExplorer() {
     [chord, transpose, accidental]
   )
 
-  const voicings = useMemo(() => (chord ? generateVoicings(chord) : []), [chord])
+  const voicings = useMemo(() => (conversion ? generateVoicings(conversion.shape) : []), [conversion])
   const current = voicings[selected] ?? voicings[0]
 
   useEffect(() => {
@@ -37,9 +38,8 @@ export function VoicingExplorer() {
 
   useEffect(() => {
     if (chord && current && conversion) {
-      const physicalNotes = shiftPlacedNotes(current.placed, -transpose)
       setKeyboard({ 
-        notes: physicalNotes, 
+        notes: current.placed, 
         label: `${conversion.shape.symbol} — ${current.name}`, 
         rootPc: conversion.shape.rootPc 
       })
@@ -52,12 +52,13 @@ export function VoicingExplorer() {
     <div className="flex flex-col h-full min-h-0">
       <GlobalLibraryBrowser />
 
-      <div className="flex-1 overflow-y-auto min-h-0 pb-6">
+      <div className="flex-1 overflow-y-auto min-h-0 pb-6 flex flex-col">
         {!chord ? (
           <Card className="mt-6 p-6 text-sm text-muted-foreground">Select a chord from the library to explore voicings.</Card>
         ) : (
-          <div className="mt-2 flex flex-col items-center justify-center max-w-lg mx-auto w-full gap-2">
-            <div className="flex items-center justify-between w-full">
+          <>
+            <div className="mt-4 flex-1 flex flex-col items-center max-w-lg mx-auto w-full gap-4">
+              <div className="flex items-center justify-between w-full">
               <button 
                 onClick={() => setSelected((prev) => (prev - 1 + voicings.length) % voicings.length)}
                 className="p-3 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary/50"
@@ -67,20 +68,22 @@ export function VoicingExplorer() {
 
               <div className="flex-1 px-4 w-full">
                 {current && conversion && (
-                  <Card className="p-5 flex flex-col transition-colors border-primary/60 bg-primary/5 shadow-md min-h-[200px]">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-3">
-                        <span className="font-heading text-2xl font-bold">{current.name}</span>
-                        <Badge variant="outline" className="font-medium py-0.5 px-2 text-primary border-primary/40 bg-primary/10">
-                          {current.category}
-                        </Badge>
+                  <Card className="p-5 flex flex-col justify-center gap-4 transition-colors border-primary/60 bg-primary/5 shadow-md h-[240px] w-full">
+                    <div>
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-3">
+                          <span className="font-heading text-2xl font-bold">{current.name}</span>
+                          <Badge variant="outline" className="font-medium py-0.5 px-2 text-primary border-primary/40 bg-primary/10">
+                            {current.category}
+                          </Badge>
+                        </div>
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {selected + 1} of {voicings.length}
+                        </span>
                       </div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {selected + 1} of {voicings.length}
-                      </span>
+                      <p className="text-xs text-muted-foreground text-pretty">{current.description}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground text-pretty mb-4">{current.description}</p>
-                    <div className="mt-auto flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold uppercase tracking-widest text-hand-left">Left Hand</span>
                         <NoteChips notes={notationSystem === "numbers" ? current.lhDegrees : current.lh} tone="left" />
@@ -116,7 +119,12 @@ export function VoicingExplorer() {
                 />
               ))}
             </div>
-          </div>
+            </div>
+            
+            <div className="mt-auto pt-6 flex-none w-full">
+              <KeyboardPanel variant="inline" />
+            </div>
+          </>
         )}
       </div>
     </div>

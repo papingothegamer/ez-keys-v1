@@ -31,15 +31,31 @@ interface KeyboardProps {
   endMidi?: number
 }
 
-const handBg: Record<Hand, string> = {
+const handBg: Record<string, string> = {
   left: "bg-hand-left",
   right: "bg-hand-right",
   shared: "bg-hand-shared",
+  "rainbow-0": "bg-red-500/80",
+  "rainbow-1": "bg-orange-500/80",
+  "rainbow-2": "bg-amber-500/80",
+  "rainbow-3": "bg-green-500/80",
+  "rainbow-4": "bg-blue-500/80",
+  "rainbow-5": "bg-indigo-500/80",
+  "rainbow-6": "bg-purple-500/80",
+  "rainbow-7": "bg-pink-500/80",
 }
-const handText: Record<Hand, string> = {
+const handText: Record<string, string> = {
   left: "text-hand-left-foreground",
   right: "text-hand-right-foreground",
   shared: "text-hand-shared-foreground",
+  "rainbow-0": "text-white",
+  "rainbow-1": "text-white",
+  "rainbow-2": "text-white",
+  "rainbow-3": "text-white",
+  "rainbow-4": "text-white",
+  "rainbow-5": "text-white",
+  "rainbow-6": "text-white",
+  "rainbow-7": "text-white",
 }
 
 export function Keyboard({ notes = [], highlightPcs = [], className, startMidi, endMidi }: KeyboardProps) {
@@ -130,12 +146,12 @@ export function Keyboard({ notes = [], highlightPcs = [], className, startMidi, 
                   onMouseEnter={() => setHovered(blackMidi)}
                   onMouseLeave={() => setHovered(null)}
                   className={cn(
-                    "absolute top-0 z-10 h-[62%] w-[62%] -translate-x-[-50%] rounded-b-md border border-black/40 shadow-md transition-colors",
+                    "absolute top-0 z-10 h-[62%] w-[62%] -translate-x-1/2 rounded-b-md border border-black/40 shadow-md transition-colors",
                     blackHand
                       ? cn(handBg[blackHand], handText[blackHand])
                       : "bg-neutral-900 text-neutral-300 hover:bg-neutral-800",
                   )}
-                  style={{ left: "50%", marginLeft: "-1px" }}
+                  style={{ left: "100%", marginLeft: "0px" }}
                 >
                   <span className="pointer-events-none flex h-full flex-col items-center justify-end pb-1 text-[9px] font-medium">
                     {blackHand ? (

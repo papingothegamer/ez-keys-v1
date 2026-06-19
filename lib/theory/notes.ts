@@ -1,7 +1,7 @@
 // Core note + pitch-class utilities for EZ-Keys.
 // Everything in the app is derived from these primitives.
 
-export type Accidental = "sharp" | "flat"
+export type Accidental = "sharp" | "flat" | "concert"
 
 // Letter names in order, used for correct enharmonic spelling.
 export const LETTERS = ["C", "D", "E", "F", "G", "A", "B"] as const
@@ -21,9 +21,16 @@ export const LETTER_PC: Record<Letter, number> = {
 // Default chromatic spellings.
 export const SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 export const FLAT_NAMES = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+export const CONCERT_NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
+
+export function getRoots(accidental: Accidental = "flat"): readonly string[] {
+  if (accidental === "concert") return CONCERT_NAMES
+  return accidental === "sharp" ? SHARP_NAMES : FLAT_NAMES
+}
 
 export function pcName(pc: number, accidental: Accidental = "flat"): string {
   const norm = ((pc % 12) + 12) % 12
+  if (accidental === "concert") return CONCERT_NAMES[norm]
   return accidental === "sharp" ? SHARP_NAMES[norm] : FLAT_NAMES[norm]
 }
 

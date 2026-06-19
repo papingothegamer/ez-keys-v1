@@ -10,7 +10,18 @@ import { parseRoot } from "@/lib/theory/notes"
 import { parseNns, formatRelativeChord } from "@/lib/theory/nns"
 import { convertToShape, generateVoicings, shiftPlacedNotes } from "@/lib/theory/voicings"
 import { WorkspaceHeader } from "@/components/workspace-header"
-import { Keyboard } from "@/components/keyboard"
+import { KeyboardPanel } from "@/components/keyboard-panel"
+import { cn } from "@/lib/utils"
+
+const TEMPLATES = [
+  { name: "Pop", progression: "1 5 6m 4" },
+  { name: "Jazz (ii-V-I)", progression: "2m 5 1" },
+  { name: "R&B", progression: "4 3m 2m 1" },
+  { name: "Neo-Soul", progression: "1maj7 2m7 3m7 4maj7" },
+  { name: "Gospel", progression: "1 3m 6m 4" },
+  { name: "Blues", progression: "1 4 1 5 4 1" },
+  { name: "Doo-Wop", progression: "1 6m 4 5" },
+]
 
 export function ProgressionTranslator() {
   const [input, setInput] = useState("1 5 6m 4")
@@ -41,9 +52,8 @@ export function ProgressionTranslator() {
   const { shape, placed } = useMemo(() => {
     if (!activeChordObj) return { shape: null, placed: [] }
     const conversion = convertToShape(activeChordObj, transpose, accidental)
-    const voicings = generateVoicings(activeChordObj)
-    const physicalNotes = shiftPlacedNotes(voicings[0]?.placed ?? [], -transpose)
-    return { shape: conversion.shape, placed: physicalNotes }
+    const voicings = generateVoicings(conversion.shape)
+    return { shape: conversion.shape, placed: voicings[0]?.placed ?? [] }
   }, [activeChordObj, transpose, accidental])
 
   return (
@@ -54,52 +64,84 @@ export function ProgressionTranslator() {
       />
 
       <div className="flex-1 overflow-y-auto min-h-0 pb-6 flex flex-col gap-6">
-        <Card className="p-5 bg-card/60 backdrop-blur-md">
-          <div className="mb-4 flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Progression (NNS or Chords)</span>
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="1 5 6m 4"
-              className="h-12 font-mono text-lg"
-            />
+        <Card className="p-4 bg-card/60 backdrop-blur-md flex-none">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Progression Templates</span>
+              <div className="flex flex-wrap gap-1.5">
+                {TEMPLATES.map((t) => (
+                  <button
+                    key={t.name}
+                    onClick={() => {
+                      setInput(t.progression)
+                      setActiveIndex(0)
+                    }}
+                    className={cn(
+                      "h-8 w-32 shrink-0 rounded-md text-xs font-medium border transition-colors",
+                      input === t.progression
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-secondary/50 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
+                    )}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 border-t border-border/50 pt-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Custom (Advanced)</span>
+              <Input
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value)
+                  setActiveIndex(0)
+                }}
+                placeholder="Type custom NNS (e.g. 1 5 6m 4)"
+                className="h-8 font-mono text-xs bg-secondary/30"
+              />
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {chords.map((c, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`px-4 py-3 rounded-md border font-mono text-lg font-semibold transition-all ${
-                  i === activeIndex 
-                    ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" 
-                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80 hover:text-foreground"
-                }`}
-              >
-                {c.raw}
-                <div className={`text-[10px] mt-1 font-sans tracking-widest uppercase ${i === activeIndex ? "text-primary-foreground/70" : "text-muted-foreground/50"}`}>
-                  {c.chord ? c.chord.symbol : "—"}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mt-4 pt-4 border-t border-border/50">
+            <div className="flex flex-wrap gap-2">
+              {chords.map((c, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`flex flex-col items-center justify-center h-14 w-20 shrink-0 rounded-md border font-mono text-base font-semibold transition-all ${
+                    i === activeIndex 
+                      ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" 
+                      : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80 hover:text-foreground"
+                  }`}
+                >
+                  {c.raw}
+                  <div className={`text-[10px] mt-1 font-sans tracking-widest uppercase ${i === activeIndex ? "text-primary-foreground/70" : "text-muted-foreground/50"}`}>
+                    {c.chord ? c.chord.symbol : "—"}
+                  </div>
+                </button>
+              ))}
+            </div>
+            
+            {activeChordObj && (
+              <div className="flex items-center justify-center gap-8 md:pl-6 md:border-l border-border/50 shrink-0">
+                <div className="text-center">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Sounding</p>
+                  <p className="font-heading text-3xl font-bold">{activeChordObj.symbol}</p>
                 </div>
-              </button>
-            ))}
+                <div className="text-center">
+                  <p className="text-[10px] uppercase tracking-wider text-primary mb-1">Play Shape</p>
+                  <p className="font-heading text-3xl font-bold text-primary">{shape?.symbol ?? "—"}</p>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
         {activeChordObj ? (
-          <div className="flex-1 min-h-0 flex flex-col gap-5">
-            <div className="flex items-center gap-8 justify-center">
-              <div className="text-center">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Sounding</p>
-                <p className="font-heading text-3xl font-bold">{activeChordObj.symbol}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs uppercase tracking-wider text-primary mb-1">Play Shape</p>
-                <p className="font-heading text-3xl font-bold text-primary">{shape?.symbol ?? "—"}</p>
-              </div>
-            </div>
-
-            <div className="flex-1 min-h-[200px] bg-background rounded-lg border border-border shadow-sm overflow-hidden flex flex-col justify-end">
-              <Keyboard notes={placed} startMidi={48} endMidi={71} className="border-0 rounded-none bg-transparent" />
+          <div className="flex-1 min-h-0 flex flex-col mt-2">
+            <div className="flex-none">
+              <KeyboardPanel variant="standalone" notes={placed} label={shape ? `${shape.symbol} — Root Position` : undefined} />
             </div>
           </div>
         ) : (

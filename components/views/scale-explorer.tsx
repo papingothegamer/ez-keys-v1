@@ -8,25 +8,28 @@ import { SCALE_TYPES, parseScale } from "@/lib/theory/scales"
 import { WorkspaceHeader } from "@/components/workspace-header"
 import { NoteChips, LabeledRow } from "@/components/note-chips"
 import { cn } from "@/lib/utils"
+import { KeyboardPanel } from "@/components/keyboard-panel"
 
-const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+import { getRoots } from "@/lib/theory/notes"
 
 export function ScaleExplorer() {
   const [root, setRoot] = useState("C")
   const [typeIdx, setTypeIdx] = useState(0)
   const setKeyboard = useAppStore((s) => s.setKeyboard)
   const notationSystem = useAppStore((s) => s.notationSystem)
+  const accidental = useAppStore((s) => s.accidental)
+  const roots = getRoots(accidental)
 
   const scale = useMemo(() => parseScale(root, SCALE_TYPES[typeIdx]), [root, typeIdx])
 
   useEffect(() => {
     if (scale) {
       const baseMidi = 60 + scale.rootPc
-      const notes = scale.pcs.map((pc) => {
+      const notes = scale.pcs.map((pc, i) => {
         const octaveShift = pc < scale.rootPc ? 12 : 0
-        return { midi: 60 + pc + octaveShift, hand: "right" as const }
+        return { midi: 60 + pc + octaveShift, hand: `rainbow-${i % 8}` as any }
       })
-      notes.push({ midi: baseMidi + 12, hand: "right" as const })
+      notes.push({ midi: baseMidi + 12, hand: `rainbow-${scale.pcs.length % 8}` as any })
 
       setKeyboard({
         notes,
@@ -39,7 +42,7 @@ export function ScaleExplorer() {
   }, [scale, setKeyboard])
 
   return (
-    <div>
+    <div className="flex flex-col h-full min-h-0">
       <WorkspaceHeader
         title="Scale Explorer"
         description="Browse scales and modes with their notes, scale degrees, and full keyboard visualization."
@@ -47,13 +50,13 @@ export function ScaleExplorer() {
 
       <div className="flex flex-wrap gap-3">
         <div className="flex flex-wrap gap-1.5">
-          {ROOTS.map((r) => (
+          {roots.map((r) => (
             <button
               key={r}
               type="button"
               onClick={() => setRoot(r)}
               className={cn(
-                "h-9 min-w-9 rounded-md border px-2 font-mono text-sm transition-colors",
+                "h-9 w-11 shrink-0 rounded-md border font-mono text-sm transition-colors",
                 root === r
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground",
@@ -78,21 +81,24 @@ export function ScaleExplorer() {
       </div>
 
       {scale && (
-        <div className="mt-6 grid gap-5">
-          <Card className="p-5">
+        <div className="mt-6 flex-1 min-h-0 flex flex-col gap-5">
+          <Card className="p-5 flex-none">
             <div className="mb-4 flex items-baseline gap-3">
               <span className="font-heading text-2xl font-semibold">{scale.rootName}</span>
               <span className="text-muted-foreground">{scale.type.name}</span>
             </div>
             <div className="grid gap-4">
               <LabeledRow label="Scale Notes">
-                <NoteChips notes={notationSystem === "numbers" ? scale.degreeLabels : scale.notes} tone="primary" />
+                <NoteChips notes={notationSystem === "numbers" ? scale.degreeLabels : scale.notes} tone="rainbow" />
               </LabeledRow>
               <LabeledRow label="Intervals">
                 <NoteChips notes={scale.degreeLabels} />
               </LabeledRow>
             </div>
           </Card>
+          <div className="mt-auto pt-4 flex-none">
+            <KeyboardPanel variant="inline" />
+          </div>
         </div>
       )}
     </div>

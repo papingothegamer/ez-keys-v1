@@ -1,9 +1,9 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
-import { Outfit, Inter, JetBrains_Mono } from "next/font/google"
+import { Inter, JetBrains_Mono } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
 import "./globals.css"
 
-const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] })
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] })
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -31,7 +31,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`dark ${outfit.variable} ${inter.variable} ${jetbrainsMono.variable} bg-background`}
+      className={`dark ${GeistSans.variable} ${inter.variable} ${jetbrainsMono.variable} bg-background`}
     >
       <body className="font-sans antialiased" suppressHydrationWarning>
         {children}

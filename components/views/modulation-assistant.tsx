@@ -11,12 +11,13 @@ import { convertToShape } from "@/lib/theory/voicings"
 import { WorkspaceHeader } from "@/components/workspace-header"
 import { Badge } from "@/components/ui/badge"
 
-const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+import { getRoots } from "@/lib/theory/notes"
 
 export function ModulationAssistant() {
   const accidental = useAppStore((s) => s.accidental)
   const referenceKey = useAppStore((s) => s.referenceKey)
   const setKeyboard = useAppStore((s) => s.setKeyboard)
+  const roots = getRoots(accidental)
   const [current, setCurrent] = useState("Eb")
   const [target, setTarget] = useState("F")
 
@@ -61,9 +62,9 @@ export function ModulationAssistant() {
       />
 
       <div className="flex flex-wrap items-end gap-4">
-        <KeyPicker label="Current Key" value={current} onChange={setCurrent} />
+        <KeyPicker label="Current Key" value={current} onChange={setCurrent} roots={roots} />
         <ArrowRight className="mb-2.5 h-5 w-5 text-muted-foreground" />
-        <KeyPicker label="Target Key" value={target} onChange={setTarget} />
+        <KeyPicker label="Target Key" value={target} onChange={setTarget} roots={roots} />
       </div>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2">
@@ -143,7 +144,7 @@ export function ModulationAssistant() {
   )
 }
 
-function KeyPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function KeyPicker({ label, value, onChange, roots }: { label: string; value: string; onChange: (v: string) => void; roots: readonly string[] }) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
@@ -152,7 +153,7 @@ function KeyPicker({ label, value, onChange }: { label: string; value: string; o
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {ROOTS.map((r) => (
+          {roots.map((r) => (
             <SelectItem key={r} value={r}>
               {r}
             </SelectItem>

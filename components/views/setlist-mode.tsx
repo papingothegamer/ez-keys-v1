@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Plus, Trash2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,16 +11,21 @@ import { parseRoot, pcName } from "@/lib/theory/notes"
 import { WorkspaceHeader } from "@/components/workspace-header"
 import { parseNns } from "@/lib/theory/nns"
 import { generateVoicings, convertToShape, shiftPlacedNotes } from "@/lib/theory/voicings"
-import { Keyboard } from "@/components/keyboard"
+import { KeyboardPanel } from "@/components/keyboard-panel"
+import { useSequencer } from "@/lib/hooks/use-sequencer"
+import { SetlistLibraryDialog } from "@/components/setlist-library-dialog"
+import { SkipBack, SkipForward } from "lucide-react"
+import { parseChordPro } from "@/lib/theory/chordpro"
 
-const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+import { getRoots } from "@/lib/theory/notes"
 
 export function SetlistMode() {
   const setlist = useAppStore((s) => s.setlist)
   const addSong = useAppStore((s) => s.addSong)
   const removeSong = useAppStore((s) => s.removeSong)
-  const referenceKey = useAppStore((s) => s.referenceKey)
-  const accidental = useAppStore((s) => s.accidental)
+  const updateSong = useAppStore((s) => s.updateSong)
+  const { referenceKey, accidental } = useAppStore()
+  const roots = getRoots(accidental)
   const setKeyboard = useAppStore((s) => s.setKeyboard)
 
   const [title, setTitle] = useState("")
@@ -53,7 +58,7 @@ export function SetlistMode() {
   const activeSong = setlist.find(s => s.id === activeSongId)
 
   if (activeSong) {
-    return <SequencerPlayer song={activeSong} onClose={() => setActiveSongId(null)} />
+    return <SequencerPlayer key={activeSong.id} song={activeSong} onClose={() => setActiveSongId(null)} onNavigate={(id) => setActiveSongId(id)} />
   }
 
   return (
@@ -74,7 +79,7 @@ export function SetlistMode() {
             <Select value={key} onValueChange={(v) => v && setKey(v)}>
               <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {ROOTS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                {roots.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -82,13 +87,21 @@ export function SetlistMode() {
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">BPM</span>
             <Input type="number" value={bpm} onChange={(e) => setBpm(Number(e.target.value))} className="h-10" />
           </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Progression (NNS)</span>
-            <Input value={prog} onChange={(e) => setProg(e.target.value)} placeholder="1 5 6m 4" className="h-10 font-mono" />
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[250px]">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Progression / Lyrics (ChordPro)</span>
+            <textarea 
+              value={prog} 
+              onChange={(e) => setProg(e.target.value)} 
+              placeholder="Amazing grace, how [5]sweet the sound" 
+              className="flex min-h-[40px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono resize-y" 
+            />
           </div>
-          <Button onClick={handleAdd} className="h-10">
-            <Plus className="mr-1 h-4 w-4" /> Add Song
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleAdd} className="h-10">
+              <Plus className="mr-1 h-4 w-4" /> Add Song
+            </Button>
+            <SetlistLibraryDialog onAddSong={(song) => addSong({ title: song.title, key: "C", bpm: song.defaultBpm, progression: song.progression, timeSignature: song.timeSignature })} />
+          </div>
         </div>
       </Card>
 
@@ -111,7 +124,14 @@ export function SetlistMode() {
                 className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-x-4 border-b border-border px-4 py-3 last:border-b-0"
               >
                 <span className="truncate text-sm font-medium text-foreground">{song.title}</span>
-                <span className="w-14 text-center font-mono text-sm">{song.key}</span>
+                <div className="w-16">
+                  <Select value={song.key} onValueChange={(v) => updateSong(song.id, { key: v })}>
+                    <SelectTrigger className="h-8 px-2 font-mono text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {roots.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <span className="w-20 text-center font-mono text-sm font-semibold text-primary">{shape}</span>
                 <span className="w-20 text-center font-mono text-sm text-muted-foreground">+{transpose}</span>
                 <button
@@ -139,8 +159,15 @@ export function SetlistMode() {
   )
 }
 
-function SequencerPlayer({ song, onClose }: { song: SetlistSong; onClose: () => void }) {
-  const { isPlaying, currentStep, steps, togglePlayback, stopPlayback, setCurrentStep } = useSequencer(song.progression, song.bpm, song.timeSignature)
+function SequencerPlayer({ song, onClose, onNavigate }: { song: SetlistSong; onClose: () => void; onNavigate: (id: string) => void }) {
+  const setlist = useAppStore(s => s.setlist)
+  const activeIndex = setlist.findIndex(s => s.id === song.id)
+  const prevSong = setlist[activeIndex - 1]
+  const nextSong = setlist[activeIndex + 1]
+
+  const parsedChordPro = useMemo(() => parseChordPro(song.progression), [song.progression])
+  
+  const { isPlaying, currentStep, steps, togglePlayback, stopPlayback, setCurrentStep } = useSequencer(parsedChordPro.steps, song.bpm, song.timeSignature)
   
   const referenceKey = useAppStore(s => s.referenceKey)
   const accidental = useAppStore(s => s.accidental)
@@ -159,33 +186,63 @@ function SequencerPlayer({ song, onClose }: { song: SetlistSong; onClose: () => 
   const { shape, placed } = useMemo(() => {
     if (!activeChord) return { shape: null, placed: [] }
     const conversion = convertToShape(activeChord, transpose, accidental)
-    const voicings = generateVoicings(activeChord)
-    // Use the first voicing for playback, shift to physical
-    const physicalNotes = shiftPlacedNotes(voicings[0]?.placed ?? [], -transpose)
-    return { shape: conversion.shape, placed: physicalNotes }
+    const voicings = generateVoicings(conversion.shape)
+    return { shape: conversion.shape, placed: voicings[0]?.placed ?? [] }
   }, [activeChord, transpose, accidental])
 
   return (
     <div className="flex flex-col h-full gap-5">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => { stopPlayback(); onClose() }}>Back to Setlist</Button>
-        <div>
-          <h2 className="font-heading text-xl font-bold">{song.title}</h2>
-          <p className="text-xs text-muted-foreground">Key of {song.key} • {song.bpm} BPM</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => { stopPlayback(); onClose() }}>Back to Setlist</Button>
+          <div>
+            <h2 className="font-heading text-xl font-bold">{song.title}</h2>
+            <p className="text-xs text-muted-foreground">Key of {song.key} • {song.bpm} BPM</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2 bg-secondary/50 p-1.5 rounded-lg border border-border">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            disabled={!prevSong} 
+            onClick={() => prevSong && onNavigate(prevSong.id)}
+            title={prevSong?.title}
+          >
+            <SkipBack className="h-4 w-4" />
+          </Button>
+          <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground px-2">Setlist</span>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            disabled={!nextSong} 
+            onClick={() => nextSong && onNavigate(nextSong.id)}
+            title={nextSong?.title}
+          >
+            <SkipForward className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
       <Card className="p-5 flex flex-col items-center justify-center bg-card/60 backdrop-blur-md">
-        <div className="mb-8 flex items-center justify-center gap-3 flex-wrap">
-          {steps.map((step, i) => (
-            <button 
-              key={i} 
-              onClick={() => setCurrentStep(i)}
-              className={`px-4 py-2 rounded-md font-mono text-lg font-semibold transition-colors ${i === currentStep ? "bg-primary text-primary-foreground shadow-md scale-110" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
-            >
-              {step}
-            </button>
+        <div className="mb-8 w-full max-w-2xl mx-auto flex flex-col gap-4 text-center">
+          {parsedChordPro.lines.map((line, lineIdx) => (
+            <div key={lineIdx} className="flex flex-wrap justify-center leading-loose">
+              {line.map((seg, segIdx) => (
+                <div key={segIdx} className="flex flex-col items-center mx-1 group cursor-pointer" onClick={() => seg.stepIndex !== -1 && setCurrentStep(seg.stepIndex)}>
+                  <span className={`font-mono text-sm font-bold transition-colors mb-[-4px] ${seg.stepIndex === currentStep ? 'text-primary scale-110' : 'text-muted-foreground/60 group-hover:text-muted-foreground'}`}>
+                    {seg.chord ?? "\u00A0"}
+                  </span>
+                  <span className={`text-lg transition-colors ${seg.stepIndex === currentStep ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                    {seg.lyric || "\u00A0"}
+                  </span>
+                </div>
+              ))}
+            </div>
           ))}
+          {parsedChordPro.steps.length === 0 && (
+            <p className="text-muted-foreground text-sm">Add [chords] inside the lyrics to play.</p>
+          )}
         </div>
 
         <div className="flex items-center gap-8 mb-6">
@@ -204,9 +261,8 @@ function SequencerPlayer({ song, onClose }: { song: SetlistSong; onClose: () => 
         </Button>
       </Card>
 
-      <div className="flex-1 min-h-0 bg-background rounded-lg border border-border shadow-sm overflow-hidden flex flex-col justify-end">
-        {/* Render a 2 octave keyboard strictly C3 (48) to B4 (71) */}
-        <Keyboard notes={placed} startMidi={48} endMidi={71} className="border-0 rounded-none bg-transparent" />
+      <div className="flex-1 min-h-0">
+        <KeyboardPanel variant="standalone" notes={placed} label={shape ? `${shape.symbol} — Root Position` : undefined} />
       </div>
     </div>
   )

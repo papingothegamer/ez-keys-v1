@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card } from "@/components/ui/card"
 import { useMemo } from "react"
 
-const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+import { getRoots } from "@/lib/theory/notes"
 const QUALITIES = [
   { val: "", label: "Triad (Major)" },
   { val: "m", label: "Triad (Minor)" },
@@ -32,6 +32,9 @@ export function GlobalLibraryBrowser() {
     setActiveChordOverride 
   } = useAppStore()
 
+  const accidental = useAppStore((s) => s.accidental)
+  const roots = getRoots(accidental)
+
   const library = useMemo(() => generateKeyLibrary(activeKey, activeChordOverrides[activeKey]), [activeKey, activeChordOverrides])
   const activeChord = library[activeChordIndex]
   const keyPc = parseRoot(activeKey)?.pc ?? 0
@@ -52,7 +55,7 @@ export function GlobalLibraryBrowser() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {ROOTS.map((r) => (
+            {roots.map((r) => (
               <SelectItem key={r} value={r}>
                 {r}
               </SelectItem>

@@ -27,7 +27,7 @@ export interface SetlistSong {
   progression: string
 }
 
-export type Hand = "left" | "right" | "shared"
+export type Hand = "left" | "right" | "shared" | (string & {})
 export interface KbNote {
   midi: number
   hand: Hand
@@ -65,6 +65,7 @@ interface AppState {
   setlist: SetlistSong[]
   addSong: (song: Omit<SetlistSong, "id">) => void
   removeSong: (id: string) => void
+  updateSong: (id: string, updates: Partial<SetlistSong>) => void
 
   // Shared keyboard visualization state (set by the active feature panel)
   kbNotes: KbNote[]
@@ -108,14 +109,18 @@ export const useAppStore = create<AppState>()(
         })),
 
       setlist: [
-        { id: "1", title: "Song 1", key: "Eb", bpm: 120, timeSignature: "4/4", progression: "1 5 6m 4" },
-        { id: "2", title: "Song 2", key: "F#", bpm: 90, timeSignature: "4/4", progression: "6m 4 1 5" },
+        { id: "1", title: "Amazing Grace", key: "Eb", bpm: 90, timeSignature: "3/4", progression: "[1] Amazing grace how [1] sweet the [1] sound\nThat [4] saved a [4] wretch like [1] me! [1]" },
+        { id: "2", title: "Doxology", key: "G", bpm: 80, timeSignature: "4/4", progression: "[1] Praise God, from [5] Whom all [4] blessings [1] flow" },
       ],
       addSong: (song) =>
         set((s) => ({
           setlist: [...s.setlist, { id: crypto.randomUUID(), ...song }],
         })),
       removeSong: (id) => set((s) => ({ setlist: s.setlist.filter((song) => song.id !== id) })),
+      updateSong: (id, updates) =>
+        set((s) => ({
+          setlist: s.setlist.map((song) => (song.id === id ? { ...song, ...updates } : song)),
+        })),
 
       kbNotes: [],
       kbPcs: [],

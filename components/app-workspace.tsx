@@ -15,18 +15,15 @@ import { SetlistMode } from "./views/setlist-mode"
 import { SettingsView } from "./views/settings-view"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { parseRoot } from "@/lib/theory/notes"
-
-// Views that don't need the always-on keyboard panel.
-const NO_KEYBOARD = new Set(["modulation", "setlist", "settings"])
-const ROOTS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+import { parseRoot, getRoots } from "@/lib/theory/notes"
 
 export function AppWorkspace() {
   const { view, referenceKey, setReferenceKey, activeKey, setActiveKey } = useAppStore()
+  const accidental = useAppStore((s) => s.accidental)
+  const roots = getRoots(accidental)
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const showKeyboard = !NO_KEYBOARD.has(view)
   const active = NAV_ITEMS.find((n) => n.view === view)
 
   const refPc = parseRoot(referenceKey)?.pc ?? 0
@@ -60,7 +57,7 @@ export function AppWorkspace() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ROOTS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    {roots.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                   </SelectContent>
                 </Select>
               ) : (
@@ -79,7 +76,7 @@ export function AppWorkspace() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ROOTS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    {roots.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                   </SelectContent>
                 </Select>
               ) : (
@@ -100,16 +97,9 @@ export function AppWorkspace() {
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          <main className="min-h-0 flex-1 overflow-y-auto px-5 py-4 pb-20 lg:px-8 lg:py-6 lg:pb-6">
+          <main className="min-h-0 flex-1 overflow-y-auto px-5 py-4 lg:px-8 lg:py-6">
             {mounted ? <ActiveView view={view} /> : null}
           </main>
-
-          {/* Keyboard fixed at the bottom for all screens when applicable */}
-          {mounted && showKeyboard && (
-            <div className="border-t border-border bg-background">
-              <KeyboardPanel variant="inline" />
-            </div>
-          )}
         </div>
       </div>
 

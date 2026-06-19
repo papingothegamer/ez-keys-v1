@@ -3,7 +3,7 @@
 import { type Accidental, pcName, parseRoot } from "./notes"
 import { type GeneratedChord, type ChordType, chordFromPc } from "./chords"
 
-export type Hand = "left" | "right" | "shared"
+export type Hand = "left" | "right" | "shared" | (string & {})
 
 // A note placed at an absolute MIDI number with a hand assignment.
 export interface PlacedNote {
