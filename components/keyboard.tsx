@@ -117,7 +117,7 @@ export function Keyboard({ notes = [], highlightPcs = [], className, startMidi, 
           const blackHand = showBlack ? activeHand(blackMidi) : null
           const isC = pc === 0
           return (
-            <div key={midi} className="relative flex flex-1 items-end justify-center" style={{ minWidth: 22 }}>
+            <div key={midi} className="relative flex h-full flex-1 items-end justify-center" style={{ minWidth: 22 }}>
               {/* White key */}
               <button
                 type="button"
@@ -146,12 +146,12 @@ export function Keyboard({ notes = [], highlightPcs = [], className, startMidi, 
                   onMouseEnter={() => setHovered(blackMidi)}
                   onMouseLeave={() => setHovered(null)}
                   className={cn(
-                    "absolute top-0 z-10 h-[62%] w-[62%] -translate-x-1/2 rounded-b-md border border-black/40 shadow-md transition-colors",
+                    "absolute top-0 z-10 -translate-x-1/2 rounded-b-md border border-black/40 shadow-md transition-colors",
                     blackHand
                       ? cn(handBg[blackHand], handText[blackHand])
                       : "bg-neutral-900 text-neutral-300 hover:bg-neutral-800",
                   )}
-                  style={{ left: "100%", marginLeft: "0px" }}
+                  style={{ left: "100%", height: "62%", width: "62%" }}
                 >
                   <span className="pointer-events-none flex h-full flex-col items-center justify-end pb-1 text-[9px] font-medium">
                     {blackHand ? (

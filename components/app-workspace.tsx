@@ -38,22 +38,22 @@ export function AppWorkspace() {
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar (Desktop & Mobile) */}
         <header className="flex h-14 items-center justify-between border-b border-border px-4 lg:px-8">
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-2 md:hidden">
             <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
               <span className="font-mono text-sm font-bold leading-none">EZ</span>
             </div>
-            <span className="font-heading text-sm font-semibold">{active?.label ?? "EZ-Keys"}</span>
+            <span className="font-heading text-sm font-semibold hidden sm:inline">{active?.label ?? "EZ-Keys"}</span>
           </div>
 
-          <div className="hidden items-center gap-4 text-sm lg:flex">
+          <div className="flex items-center gap-2 md:gap-4 text-sm ml-auto">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="flex flex-col items-end">
+              <div className="hidden md:flex flex-col items-end">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-foreground">I Play In</span>
                 <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Fingering</span>
               </div>
               {mounted ? (
                 <Select value={referenceKey} onValueChange={setReferenceKey}>
-                  <SelectTrigger className="h-9 w-20 font-mono font-bold bg-secondary/50 border-border">
+                  <SelectTrigger className="h-8 w-14 md:h-9 md:w-20 font-mono font-bold bg-secondary/50 border-border text-xs md:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -66,13 +66,13 @@ export function AppWorkspace() {
               
               <span className="mx-3 text-muted-foreground/30">→</span>
               
-              <div className="flex flex-col items-end">
+              <div className="hidden md:flex flex-col items-end">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-foreground">Audience Hears</span>
                 <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Sounding Key</span>
               </div>
               {mounted ? (
                 <Select value={activeKey} onValueChange={setActiveKey}>
-                  <SelectTrigger className="h-9 w-20 font-mono font-bold bg-secondary/50 border-border text-primary">
+                  <SelectTrigger className="h-8 w-14 md:h-9 md:w-20 font-mono font-bold bg-secondary/50 border-border text-primary text-xs md:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -85,13 +85,13 @@ export function AppWorkspace() {
             </div>
           </div>
 
-          <div className="hidden lg:block">
+          <div className="hidden sm:block ml-2 md:ml-0">
             {mounted ? (
-              <div className="flex h-8 items-center justify-center rounded border border-primary/30 bg-primary/10 px-3 font-mono text-xs font-medium text-primary shadow-sm">
+              <div className="flex h-8 items-center justify-center rounded border border-primary/30 bg-primary/10 px-2 md:px-3 font-mono text-[10px] md:text-xs font-medium text-primary shadow-sm">
                 TRANSPOSE +{transpose}
               </div>
             ) : (
-              <div className="h-8 w-24 rounded border border-border bg-secondary/50" />
+              <div className="h-8 w-20 md:w-24 rounded border border-border bg-secondary/50" />
             )}
           </div>
         </header>

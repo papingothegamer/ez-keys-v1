@@ -9,123 +9,115 @@ export interface LibrarySong {
 
 export const SONG_LIBRARY: LibrarySong[] = [
   {
-    "id": "hymn-1",
-    "title": "Amazing Grace",
-    "genre": "Gospel",
-    "defaultBpm": 90,
-    "timeSignature": "3/4",
-    "progression": "[1] Amazing grace how [1] sweet the [1] sound\nThat [4] saved a [4] wretch like [1] me! [1]\n[1] I once was [1] lost, but [6m] now am [5] found, [5]\nWas [1] blind, but [4] now I [1] see. [1]"
-  },
-  {
-    "id": "hymn-2",
-    "title": "Be Thou My Vision",
-    "genre": "CCM",
-    "defaultBpm": 80,
-    "timeSignature": "3/4",
-    "progression": "[1] Be Thou my [1] vision, O [5] Lord of my [1] heart [1]\n[5] Naught be all [5] else to me, [4] save that Thou [5] art [5]\n[4] Thou my best [4] thought, by [1] day or by [6m] night [6m]\n[1] Waking or [6m] sleeping, Thy [4] presence my [1] light [1]"
-  },
-  {
-    "id": "hymn-3",
-    "title": "How Great Thou Art",
-    "genre": "Gospel",
-    "defaultBpm": 85,
-    "timeSignature": "4/4",
-    "progression": "[1] O Lord my God, when I in awesome [4] wonder,\nConsider [1] all the worlds Thy [5] hands have [1] made;\n[1] I see the stars, I hear the rolling [4] thunder,\nThy power through-[1]out the [5] universe dis-[1]played.\n\nChorus:\nThen sings my [1] soul, my [4] Savior God, to [1] Thee,\nHow great Thou [2m] art, [5] how great Thou [1] art!\nThen sings my [1] soul, my [4] Savior God, to [1] Thee,\nHow great Thou [2m] art, [5] how great Thou [1] art!"
-  },
-  {
-    "id": "hymn-4",
-    "title": "It Is Well With My Soul",
-    "genre": "CCM",
-    "defaultBpm": 75,
-    "timeSignature": "4/4",
-    "progression": "[1] When peace like a [1] river, at-[4]tendeth my [5] way,\nWhen [6m] sorrows like [2m] sea billows [5] roll\nWhat-[1]ever my [4] lot, Thou hast [2m] taught me to [5] say\nIt is [1] well, it is [4] well, with my [1] soul\n\nChorus:\nIt is [1] well (it is [5] well)\nWith my [5] soul (with my [1] soul)\nIt is [4] well, it is [5] well with my [1] soul"
-  },
-  {
-    "id": "hymn-5",
-    "title": "Great Is Thy Faithfulness",
-    "genre": "Gospel",
-    "defaultBpm": 80,
-    "timeSignature": "3/4",
-    "progression": "[1] Great is Thy [4] faithfulness, [5] O God my [1] Father;\n[4] There is no [1] shadow of [2m] turning with [5] Thee;\n[5] Thou changest [1] not, Thy com-[4]passions, they fail not;\n[2m] As Thou hast [1] been, Thou for-[5]ever will [1] be.\n\nChorus:\n[5] Great is Thy [1] faithfulness!\n[6] Great is Thy [2m] faithfulness!\n[5] Morning by [1] morning new [2m] mercies I [5] see;\n[5] All I have [1] needed Thy [4] hand hath pro-[1]vided;\n[4] Great is Thy [1] faithfulness, [5] Lord, unto [1] me!"
-  },
-  {
-    "id": "hymn-6",
-    "title": "Come Thou Fount",
-    "genre": "CCM",
-    "defaultBpm": 100,
-    "timeSignature": "3/4",
-    "progression": "[1] Come Thou [5] Fount of every [4] bless-[1]ing\n[1] Tune my [5] heart to sing Thy [4] grace [1]\n[1] Streams of [5] mercy, never [4] ceas-[1]ing\n[1] Call for [5] songs of loudest [4] praise [1]\n\n[1] Teach me [4] some melodious [1] son-[5]net\n[1] Sung by [4] flaming tongues a-[5]bove\n[1] Praise the [5] mount, I'm fixed up-[4]on [1] it\n[1] Mount of [5] Thy redeeming [4] love [1]"
-  },
-  {
-    "id": "hymn-7",
-    "title": "Nothing But The Blood",
-    "genre": "Gospel",
-    "defaultBpm": 95,
-    "timeSignature": "4/4",
-    "progression": "[1] What can wash a-[1]way my sin?\n[6m] Nothing but the [5] blood of [1] Jesus;\n[1] What can make me [1] whole again?\n[6m] Nothing but the [5] blood of [1] Jesus.\n\nChorus:\n[1] Oh! precious [1] is the flow\n[5] That makes me [5] white as snow;\n[1] No other [1] fount I know,\n[6m] Nothing but the [5] blood of [1] Jesus."
-  },
-  {
-    "id": "hymn-8",
-    "title": "Holy, Holy, Holy",
-    "genre": "Traditional",
-    "defaultBpm": 80,
-    "timeSignature": "4/4",
-    "progression": "[1] Holy, [6m] holy, [4] ho-[1]ly!\n[4] Lord [1] God Al-[5]might-[5]y!\n[1] Early [6m] in the [2m] morn-[1]ing\nOur [2m] song shall [1] rise to [5] Thee\n[1] Holy, [6m] holy, [4] ho-[1]ly!\n[4] Merciful [1] and [5] might-[5]y!\n[6m] God in [1] three [4] Per-[1]sons,\n[4] blessed [5] Trini-[1]ty!"
-  },
-  {
-    "id": "hymn-9",
-    "title": "Blessed Assurance",
-    "genre": "Gospel",
-    "defaultBpm": 90,
-    "timeSignature": "9/8",
-    "progression": "[1] Blessed as-[4]surance, [1] Jesus is [1] mine;\n[2m] Oh, what a [2m] foretaste of [5] glory di-[5]vine!\n[1] Heir of sal-[4]vation, [1] purchase of [1] God,\n[2m] Born of His [1] Spirit, [5] washed in His [1] blood.\n\nChorus:\n[1] This is my [4] story, [1] this is my [1] song,\n[4] Praising my [1] Savior [2m] all the day [5] long.\n[1] This is my [4] story, [1] this is my [1] song,\n[4] Praising my [1] Savior [5] all the day [1] long."
-  },
-  {
-    "id": "jazz-1",
-    "title": "Aura Lee (Traditional)",
-    "genre": "Jazz",
-    "defaultBpm": 80,
-    "timeSignature": "4/4",
-    "progression": "[1] As the blackbird [6m] in the spring,\n[2m] 'Neath the willow [5] tree,\n[1] Sat and piped, I [6m] heard him sing,\n[2m] Singing [5] Aura [1] Lee.\n\nChorus:\n[1] Aura Lee, [6m] Aura Lee,\n[2m] Maid with golden [5] hair;\n[1] Sunshine came a-[6m]long with thee,\n[2m] And swallows [5] in the [1] air."
-  },
-  {
-    "id": "jazz-2",
-    "title": "When The Saints Go Marching In",
-    "genre": "Jazz",
+    "id": "worship-1",
+    "title": "You Are Alpha and Omega",
+    "genre": "Worship",
     "defaultBpm": 120,
     "timeSignature": "4/4",
-    "progression": "Oh, when the [1] saints [1]\nGo marching [1] in [1]\nOh, when the [1] saints go [1] marching [5] in [5]\nLord, how I [1] want [1/3] to be in that [4] number [4]\nWhen the [1] saints go [5] marching [1] in [1]"
+    "progression": "You are [1]Al-pha [2]and [3]O-[4]me-[1]ga\nWe [4]worship [2]You our [1]Lord\n[6]You are [4]wor-[6]thy [5]to be [1]praised\nWe give You [6]all [5]the [4]glo-[1]ry\n[3]We [4]worship [5]You our [6]Lord\nYou are [5]wor-[3]thy [4]to [5]be [1]praised"
   },
   {
-    "id": "folk-1",
-    "title": "Wayfaring Stranger",
-    "genre": "Folk",
-    "defaultBpm": 75,
+    "id": "worship-2",
+    "title": "Praise",
+    "genre": "Worship",
+    "defaultBpm": 120,
     "timeSignature": "4/4",
-    "progression": "[6m] I am a poor wayfaring stranger,\n[6m] While journeying through this world of [2m] woe, [2m]\n[6m] Yet there's no sickness, toil nor danger,\n[6m] In that bright world to which I [2m] go. [2m]\n\nChorus:\n[4] I'm going there to see my [1] father,\n[4] I'm going there no more to [3] roam;\n[6m] I'm only going over Jordan,\n[6m] I'm only [2m] going over [6m] home."
+    "progression": "I'll [1]praise in the valley\n[4]Praise on the [1]moun-tain\nI'll [5]praise when I'm sure\n[4]Praise when I'm [1]doub-ting\nI'll [1]praise when out-numbered\n[4]Praise when [1]surrounded\n[5]'Cause praise is the water\n[4]My enemies [1]drown in\nAs [5]long as I'm breathing\n[4]I've got a [5]rea-son to\n[6]Praise [4]the [1]Lord, oh my [5]soul"
   },
   {
-    "id": "folk-2",
-    "title": "Shenandoah",
-    "genre": "Folk",
-    "defaultBpm": 70,
+    "id": "worship-3",
+    "title": "Kadosh",
+    "genre": "Worship",
+    "defaultBpm": 120,
     "timeSignature": "4/4",
-    "progression": "Oh [1] Shenandoah, I [4] long to see [1] you,\nA-[4]way you rolling [1] river\nOh [6m] Shenandoah, I [3m] long to see you,\nA-[4]way, I'm [1] bound a-[6m]way\n'Cross the [2m] wide [5] Missouri [1]"
+    "progression": "[4]Ka-dosh, Ka-dosh, Ka-[5]dosh, Ka-do[1]sh, Ka-dosh\nIs the [2]Lamb of God who [5]sits u-pon the [6]throne\n[4]He a-lone is [5]wor-thy of our [1]praise"
   },
   {
-    "id": "folk-3",
-    "title": "Danny Boy",
-    "genre": "Traditional",
-    "defaultBpm": 65,
+    "id": "ccm-1",
+    "title": "You Are Able (Creator of the Universe)",
+    "genre": "CCM",
+    "defaultBpm": 120,
     "timeSignature": "4/4",
-    "progression": "Oh Danny [1] boy, the pipes, the [4] pipes are [1] calling\nFrom glen to [1] glen, and down the [6m] mountain [5] side\nThe summer's [1] gone, and all the [4] roses [1] falling\n'Tis you, 'tis [1] you must [5] go and I must [1] bide\n\nBut come ye [6m] back when [4] summer's in the [1] meadow\nOr when the [6m] valley's [4] hushed and white with [5] snow\n'Tis I'll be [1] here in [4] sunshine or in [1] shadow\nOh Danny [1] boy, oh Danny [5] boy, I love you [1] so"
+    "progression": "[1]Creator of the [5] universe\n[6]What can't  You [4]do\n[1]What can't You [5]change\n[3]Je-[4]sus,\nYou are [1]a-[5]ble\n[2]Great and [3]mighty [4]God\nYou are [1]a-[5]ble, [3]Je-[4]sus"
   },
   {
-    "id": "gospel-19",
-    "title": "Doxology",
-    "genre": "Gospel",
-    "defaultBpm": 80,
+    "id": "ccm-2",
+    "title": "I Will Call Upon The Lord (Magnify)",
+    "genre": "CCM",
+    "defaultBpm": 120,
     "timeSignature": "4/4",
-    "progression": "[1] Praise God, from [5] Whom all [4] blessings [1] flow;\n[1] Praise Him, all [5] creatures [4] here be-[1]low;\n[1] Praise Him a-[5]bove, ye [4] heavenly [1] host;\n[1] Praise Father, [5] Son, and [4] Holy [1] Ghost.\n[4] A-[1]men."
+    "progression": "[1]I will call upon the Lord\n[6]Who is [4]worthy to be [1]praised\n[1]So shall [4]I be [5]saved from my [4]ene-mies\n[1]The Lord li-veth, and [4]bles-sed be the [1]rock\nAnd let the [4]God of my sal-[6]va-tion be ex-[5]al-[1]ted"
+  },
+  {
+    "id": "ccm-3",
+    "title": "Covenant Keeping God",
+    "genre": "CCM",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "You'll ne-ver [4]leave me\nYou said that You won't for-[4]sake me\n[5]You are be-[6]side me and [1]that is all that mat-[5]ters\n[4]You are the [4]co-ve-nant [5]kee-ping [6]God\n[1]You are the [4]co-ve-nant [6]kee-ping [5]God"
+  },
+  {
+    "id": "ccm-4",
+    "title": "Yahweh, Rapha (Updated)",
+    "genre": "CCM",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "Yah-[4]weh, [6]Ra-[5]pha, Elo-[3]him, Shad-[6]dai, [3]Ji-[4]reh, [6]Ado-[5]nai, come and [3]mani-[5]fest your-[6]self"
+  },
+  {
+    "id": "ccm-5",
+    "title": "Hallelujah Eh",
+    "genre": "CCM",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "[1]Hallelujah eh\nHallelu-jah [4]ooo\n[5]Hallelujah eh\nIt's the sound of [1]vic-to-ry\n[1]Hallelujah eh\nHallelu-jah [4]ooo\nLet the [5]sound of re-[4]joi-[5]cing fill this [1]place"
+  },
+  {
+    "id": "african-1",
+    "title": "Tambira Jehovah",
+    "genre": "African Medley",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "[1]Tam-bi-ra Je-[4]ho-vah\n[5]Tam-bi-ra Je-[1]ho-vah\n[1]Iyele-iyelele, [4]Iyelele-iyelele\n[5]Tam-bi-ra Je-[1]ho-vah"
+  },
+  {
+    "id": "african-2",
+    "title": "I've Got Joy (Joy Overflow)",
+    "genre": "African Medley",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "[1]I've got joy, joy, joy, joy, [5]joy, joy, joy\nJoy o-ver-[4]flows in [5]my [6]life\n[1]I've got joy, joy, joy, joy, [5]joy, joy, joy\nJoy o-ver-[4]flows in [5]my [1]life"
+  },
+  {
+    "id": "african-3",
+    "title": "Comment Ne Pas Te Louer",
+    "genre": "African Medley",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "[1]Com-ment ne pas te lou-[4]e— e- [5]er\nCom-ment ne pas te lou-[1]ee— e- [6]er\nCom-ment ne pas te lou-[2]ee— e- [5]er\nSei-gneur Jé-[1]sus\n[1]Quand je re-garde au-tour de [4]moi\n[4]Je vois ta [5]gloire\nSei-gneur Jé-[1]sus, je te bé-[6]nis\nCom-ment ne pas te lou-[2]ee— e- [5]er\nSei-gneur Jé-[1]sus"
+  },
+  {
+    "id": "african-4",
+    "title": "Eh Yahweh Kumama",
+    "genre": "African Medley",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "[1]Eh Yah-weh, Eh [5]Yah-weh, [6]Ku-ma-ma\nEh Yah-[4]weh, Eh [5]Yah-weh, [1]Ku-ma-ma"
+  },
+  {
+    "id": "african-5",
+    "title": "Jehovah You Are The Most High",
+    "genre": "African Medley",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "Je-ho-vah [4]You are the most [6]high\nJe-ho-vah [5]You are the most high [1]God\nJe-ho-vah [4]e— [6]eh\nJe-ho-vah [5]a— [1]ah"
+  },
+  {
+    "id": "african-6",
+    "title": "Who Has The Final Say",
+    "genre": "African Medley",
+    "defaultBpm": 120,
+    "timeSignature": "4/4",
+    "progression": "[1]Who has the fi-[4]nal [3]say?\n[6]Je-ho-[4]vah has the [5]fi-nal [1]say\n[1]Who has the fi-[4]nal [3]say?\n[6]Je-ho-[4]vah has the [5]fi-nal [1]say\nJe-ho-vah [1]turned my life around\nJe-ho-vah [1]turned my life [5]around\nHe [6]makes a [5]way where there [4]is no [2]way\n[4]Je-ho-vah has the [5]fi-nal [1]say"
   }
 ];

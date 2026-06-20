@@ -22,6 +22,8 @@ export const viewport: Viewport = {
   themeColor: "#0c0e12",
 }
 
+import { TutorialDialog } from "@/components/tutorial-dialog"
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,6 +37,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased" suppressHydrationWarning>
         {children}
+        <TutorialDialog />
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

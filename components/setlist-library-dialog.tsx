@@ -12,7 +12,7 @@ interface SetlistLibraryDialogProps {
   onAddSong: (song: LibrarySong) => void
 }
 
-const GENRES = ["All", "CCM", "Pop", "R&B", "Jazz", "Gospel"]
+const GENRES = ["All", "Worship", "CCM", "African Medley"]
 
 export function SetlistLibraryDialog({ onAddSong }: SetlistLibraryDialogProps) {
   const [open, setOpen] = useState(false)

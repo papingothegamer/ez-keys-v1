@@ -11,12 +11,13 @@ interface KeyboardPanelProps {
   label?: string | null
   startMidi?: number
   endMidi?: number
+  headerContent?: React.ReactNode
 }
 
 // Right-hand (or mobile beneath-results) panel that always shows the keyboard
 // reflecting whatever the active feature panel has pushed into the store,
 // OR the explicitly provided props.
-export function KeyboardPanel({ variant = "side", notes, highlightPcs, label, startMidi, endMidi }: KeyboardPanelProps) {
+export function KeyboardPanel({ variant = "side", notes, highlightPcs, label, startMidi, endMidi, headerContent }: KeyboardPanelProps) {
   const storeNotes = useAppStore((s) => s.kbNotes)
   const storePcs = useAppStore((s) => s.kbPcs)
   const storeLabel = useAppStore((s) => s.kbLabel)
@@ -36,9 +37,12 @@ export function KeyboardPanel({ variant = "side", notes, highlightPcs, label, st
       }
     >
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Keyboard
-        </h2>
+        <div className="flex items-center gap-6">
+          <h2 className="font-heading text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Keyboard
+          </h2>
+          {headerContent}
+        </div>
         {kbLabel ? (
           <span className="rounded-md bg-secondary px-2.5 py-1 font-mono text-sm font-semibold text-secondary-foreground">
             {kbLabel}
