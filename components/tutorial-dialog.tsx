@@ -165,7 +165,7 @@ export function TutorialDialog() {
           ))}
         </div>
 
-        <DialogFooter className="shrink-0 flex flex-row items-center justify-between px-4 sm:px-6 py-4 bg-secondary/30 border-t border-border/50 space-x-0 sm:space-x-0">
+        <DialogFooter className="m-0 shrink-0 flex flex-row items-center justify-between px-4 sm:px-6 py-4 bg-secondary/30 border-t border-border/50 space-x-0 sm:space-x-0">
           <Button 
             variant="ghost" 
             onClick={prevStep}
